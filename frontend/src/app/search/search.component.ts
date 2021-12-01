@@ -1,17 +1,23 @@
 import { Component, OnInit, Query } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import { QueryService, TextLine, TextLines} from './query.service'; 
 
 // https://angular.io/tutorial
 @Component({
-  selector: 'app-root',
+  selector: 'search-app',
   // template: '<h1>{{ title }}</h1><p>Hello.</p>',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  templateUrl: './search.component.html',
+  styleUrls: ['./search.component.css']
 })
-export class AppComponent implements OnInit{
+export class SearchComponent implements OnInit{
+  speakers = ["Artemis", "Zagreus"]
   title = 'frontend';
   textLines: TextLine[] = [];
   display: string = ""
+  selectedSpeakers = new Set()
+
+  queryForm = new FormControl("")
 
   constructor(private queryService: QueryService) { }
 
@@ -22,6 +28,15 @@ export class AppComponent implements OnInit{
           this.display = this.textLines[0].speaker
         })
       return this.textLines
+  }
+
+  onSpeakerSelection(speaker: string) {
+    if (this.selectedSpeakers.has(speaker)) {
+      this.selectedSpeakers.delete(speaker)
+    } else {
+      this.selectedSpeakers.add(speaker)
+    }
+    console.log(this.selectedSpeakers)
   }
 
   ngOnInit(): void {

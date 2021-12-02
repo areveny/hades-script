@@ -1,6 +1,8 @@
 import { Component, OnInit, Query } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import { BrowserDynamicTestingModule } from '@angular/platform-browser-dynamic/testing';
+import { distinct } from 'rxjs';
 import { QueryService, TextLine, TextLines} from './query.service'; 
 
 // https://angular.io/tutorial
@@ -11,15 +13,24 @@ import { QueryService, TextLine, TextLines} from './query.service';
   styleUrls: ['./search.component.css']
 })
 export class SearchComponent implements OnInit{
-  speakers = ["Artemis", "Zagreus"]
+  speakers = ["Artemis", "Zagreus", "Zeus", "Athena", "Aphrodite", "Ares", "Hades", "Demeter"]
   title = 'frontend';
   textLines: TextLine[] = [];
   display: string = ""
   selectedSpeakers = new Set()
+  toggle: {[key: string]: boolean} = {};
+  colors: {[key: string]: string} = {"Artemis": "green",
+                                      "Zagreus": "red"
+  };
+  
 
   queryForm = new FormControl("")
 
-  constructor(private queryService: QueryService) { }
+  constructor(private queryService: QueryService) {
+    for (var speaker in this.speakers) {
+      this.toggle[speaker] = false
+    }
+  }
 
   getTextLines() {
       this.queryService.runQuery()
@@ -36,7 +47,16 @@ export class SearchComponent implements OnInit{
     } else {
       this.selectedSpeakers.add(speaker)
     }
+    this.toggle[speaker] = !this.toggle[speaker]
     console.log(this.selectedSpeakers)
+  }
+
+  getColor(speaker: string) {
+    if (speaker in this.colors) {
+      return this.colors[speaker]
+    } else {
+      return "black";
+    }
   }
 
   ngOnInit(): void {

@@ -1,5 +1,3 @@
-<h1>Hades Text</h1>
-
 <h3>Search</h3>
 
 <div class="speaker-selectors">
@@ -8,16 +6,23 @@
         {{ speaker }}
     </button> -->
 
-<mat-button-toggle-group name="speakers" aria-label="Speakers" multiple>
+
+<!-- <mat-button-toggle-group name="speakers" aria-label="Speakers" multiple>
     <mat-button-toggle *ngFor="let speaker of speakers" mat-stroked-button 
     color="primary" 
+    class="speaker-select"
     value="{{ speaker }}"
     (click)="onSpeakerSelection(speaker)">
         {{ speaker }}
     </mat-button-toggle>
-  </mat-button-toggle-group>
+  </mat-button-toggle-group> -->
+    <button *ngFor="let speaker of speakers" 
+    class="speaker-select"
+    value="{{ speaker }}"
+    [style.background-color]="toggle[speaker] ? getColor(speaker) : 'grey'"
+    (click)="onSpeakerSelection(speaker)">
+        {{ speaker }}
+</button>
 </div>
-
-<label for="name">Query: </label>
 
 <p>{{ display }}</p>

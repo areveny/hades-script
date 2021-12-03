@@ -5,7 +5,7 @@ const sqlite3 = require('sqlite3')
 var db = new sqlite3.Database('../hades-index.db')
 
 const app = express()
-app.use(cors())
+app.use(cors({'origin': true}))
 app.use(express.json())
 const port = 4000
 

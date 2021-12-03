@@ -42,7 +42,6 @@ class Query extends React.Component<any, any> {
     if (this.selectedSpeakers.size > 0) {
       filters = " AND ".concat(Array.from(this.selectedSpeakers).join(" OR  "))
     } 
-    console.log(this.selectedSpeakers, filters)
     return `SELECT * FROM lines${filters};`
   }
 

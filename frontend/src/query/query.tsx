@@ -35,13 +35,15 @@ class Query extends React.Component<any, any> {
         this.selectedSpeakers.add(speaker)
       }
       this.updateQuery()
-      console.log(this.selectedSpeakers)
   }
 
   getQuery = () => {
-    var filters = Array.from(this.selectedSpeakers).join(" OR  ")
-    console.log(filters)
-    return `SELECT * FROM lines AND ${filters}`
+    var filters = "";
+    if (this.selectedSpeakers.size > 0) {
+      filters = " AND ".concat(Array.from(this.selectedSpeakers).join(" OR  "))
+    } 
+    console.log(this.selectedSpeakers, filters)
+    return `SELECT * FROM lines${filters};`
   }
 
   updateQuery = () => {

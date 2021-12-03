@@ -6,7 +6,8 @@ var db = new sqlite3.Database('../hades-index.db')
 
 const app = express()
 app.use(cors())
-const port = 3000
+app.use(express.json())
+const port = 4000
 
 app.get("/", (req, res) => {
 
@@ -16,6 +17,16 @@ app.get("/", (req, res) => {
 
 })
 
+app.post("/", (req, res) => {
+    console.log(req.body.query)
+    res.json(req.body.query)
+    // db.all(req.body.query, function(err, rows) {
+    //     console.log(rows)
+    //     res.json(req.body.query)
+    // })
+
+    }
+)
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)

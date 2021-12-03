@@ -1,12 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Search from './App.tsx';
+import Query from './query/query.tsx';
+import Header from './header/header.tsx';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Search />
+    <Header />
+    <Query />
   </React.StrictMode>,
   document.getElementById('root')
 );

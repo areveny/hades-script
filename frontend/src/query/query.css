@@ -1,0 +1,15 @@
+.query {
+    display: inline-block; 
+    justify-content: center; 
+    white-space: wrap;
+}
+
+.speaker-select {
+  border: 0px;
+  border-radius: 0px;
+  margin-left: 2px;
+  margin-right: 2px;
+  margin-bottom: 2px;
+  background-color: green;
+  font-size: 2vw;
+}

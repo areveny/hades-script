@@ -18,8 +18,8 @@ app.get("/", (req, res) => {
 })
 
 app.post("/", (req, res) => {
-    console.log(req.body.query)
-    res.json(req.body.query)
+    console.log(req.body)
+    res.json(req.body)
     // db.all(req.body.query, function(err, rows) {
     //     console.log(rows)
     //     res.json(req.body.query)

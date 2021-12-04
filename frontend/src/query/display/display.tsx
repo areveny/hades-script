@@ -1,9 +1,9 @@
 import React from 'react';
-import './display.css';
 import axios from 'axios';
+import './display.css';
 
 interface DisplayProps {
-  query: string;
+  selectedSpeakers: Set<string>;
 }
 
 interface DisplayState {
@@ -18,11 +18,10 @@ class Display extends React.PureComponent<DisplayProps, DisplayState> {
     this.state = { "result": "" }
   }
 
-  addsStuffQuery = (query: string) => {
-    var body = { "query": query };
+  addsStuffQuery = () => {
     this.setState({ "result": "" }, () => {
       axios.post("http://localhost:4000/",
-        body,
+        Array.from(this.props.selectedSpeakers),
         { headers: { "Content-Type": "application/json" } })
         .then((response) => {
           this.setState({ "result": response.data })
@@ -30,9 +29,17 @@ class Display extends React.PureComponent<DisplayProps, DisplayState> {
     })
   }
 
+  getQuery = () => {
+    var filters = "";
+    if (this.props.selectedSpeakers.size > 0) {
+      filters = " AND ".concat(Array.from(this.props.selectedSpeakers).join(" OR  "))
+    } 
+    return `SELECT * FROM lines${filters};`
+  }
+
   componentDidUpdate(prevProps: DisplayProps) {
-    if (this.props.query !== prevProps.query) {
-      this.addsStuffQuery(this.props.query)
+    if (this.props.selectedSpeakers !== prevProps.selectedSpeakers) {
+      this.addsStuffQuery()
     }
   }
 

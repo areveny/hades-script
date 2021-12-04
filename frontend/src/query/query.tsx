@@ -7,13 +7,17 @@ const colors: {[key: string]: string} = {"Artemis": "green",
                                       "Zagreus": "red"
   };
 
-class Query extends React.Component<any, any> {
+interface QueryState {
+  selectedSpeakers: Set<string>
+}
+
+class Query extends React.Component<any, QueryState> {
 
   selectedSpeakers = new Set()
 
   constructor(props: any) {
     super(props)
-    this.state = {"query": this.getQuery()}
+    this.state = {"selectedSpeakers": new Set<string>()}
   }
 
   getColor(speaker: string) {
@@ -27,26 +31,16 @@ class Query extends React.Component<any, any> {
   selectSpeaker = (e: React.MouseEvent) => {
       var element = (e.currentTarget as HTMLButtonElement)
       var speaker = element.value
-      if (this.selectedSpeakers.has(speaker)) {
-        this.selectedSpeakers.delete(speaker)
+      var clonedMap = new Set<string>(this.state.selectedSpeakers)
+      if (clonedMap.has(speaker)) {
+        clonedMap.delete(speaker)
         element.style.removeProperty("background-color")
       } else {
         element.style.backgroundColor = this.getColor(speaker)
-        this.selectedSpeakers.add(speaker)
+        clonedMap.add(speaker)
       }
-      this.updateQuery()
-  }
-
-  getQuery = () => {
-    var filters = "";
-    if (this.selectedSpeakers.size > 0) {
-      filters = " AND ".concat(Array.from(this.selectedSpeakers).join(" OR  "))
-    } 
-    return `SELECT * FROM lines${filters};`
-  }
-
-  updateQuery = () => {
-    this.setState({"query": this.getQuery()})
+      this.setState({"selectedSpeakers": clonedMap})
+      console.log(this.state.selectedSpeakers)
   }
 
   render() {
@@ -61,7 +55,7 @@ class Query extends React.Component<any, any> {
             </button>
           })}
         </div>
-        <Display query={this.state.query} />
+        <Display selectedSpeakers={this.state.selectedSpeakers} />
       </div>
     );
   }

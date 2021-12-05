@@ -1,5 +1,6 @@
 raw-data
 hades-index.db
+.DS_Store
 
 # Logs
 logs

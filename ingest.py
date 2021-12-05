@@ -19,7 +19,7 @@ class Ingestion():
     def find_assignment_or_table(self, code, cur_line):
         """Processes unassigned tables and assignments of tables to a name"""
         print(self.names_stack, cur_line[:-1])
-        if "HadesFirstMeetingCont1" in self.names_stack:
+        if "HadesAboutGhostAdmin02" in self.names_stack:
             raise StopIteration
         while code:
             if '{' in cur_line and '--' not in cur_line: # Found unassigned table
@@ -28,7 +28,9 @@ class Ingestion():
                 cur_line = '}'.join(cur_line.split('}')[1:]) # Get everything after the open bracket
 
             if "Cue" in cur_line:
-                self.process_voice_line(code, cur_line)
+                parsed_object = self.process_voice_line(code, cur_line)
+                print(parsed_object)
+                return
 
             if '=' in cur_line and '--' not in cur_line: # Found assignment
                 split_line = cur_line.split(' =')
@@ -61,7 +63,6 @@ class Ingestion():
             self.set_key_values(cur_line, cur_object) # Consume assignments from line
             
             if '}' in cur_line: # Done with this assignment
-                print(cur_object)
                 return cur_object
             
             cur_line = next(code)

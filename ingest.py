@@ -5,22 +5,70 @@ from ingestion_db import IngestionDB, SqliteIngestionDB
 class Ingestion():
 
     def __init__(self, file, ingestion_db):
-        f = open(file, 'r')
         self.names_stack = list()
-        self.data_objects = list()
         self.ingestion_db = ingestion_db
 
-        code = iter(f)
-        self.populate(code)
+        f = open(file, 'r')
+        self.code_lines = iter(f)
+        root_context = dict()
+        self.process(next(self.code_lines), root_context)
+        print(root_context)
 
     def populate(self, code: typing.IO):
-        data_objects = list()
         try:
-            while code:
-                cur_line = next(code)
-                self.find_assignment_or_table(code, cur_line)
+            while True:
+                self.process(next(self.code_lines))
         except StopIteration:
-            pass
+            return
+
+    delimiting_symbols = {'--', '{', '}', '=', '"', ','}
+
+    def process(self, cur_line: str, context: dict) -> typing.Tuple[str, dict]:
+        print(cur_line, context)
+
+        locs: typing.Dict[int, str] = dict()
+        for symbol in Ingestion.delimiting_symbols:
+            locs[cur_line.find(symbol)] = symbol
+        
+        found_symbols = [i for i in locs.keys() if i != -1]
+        if len(found_symbols) == 0:
+            return self.process(next(self.code_lines), context)
+
+        leading_symbol_loc = min(found_symbols)
+        leading_symbol = locs[leading_symbol_loc]
+
+        if leading_symbol == '--':
+            return '', None
+        elif leading_symbol == '{':
+            nested_context = dict()
+            cur_line = cur_line[cur_line.find('{') + 1:] # Get everything after the open bracket
+            cur_line, result_context = self.process(cur_line, nested_context) # Create new context
+            while result_context:
+                cur_line, result_context = self.process(cur_line, nested_context) # Create new context
+            # The cur_line is already advanced in the base case below
+            return cur_line, nested_context
+            # Test if nested object is a viable Cue, then process it
+        elif leading_symbol == '}':
+            return cur_line[leading_symbol_loc:], None # Close the context
+
+        elif leading_symbol == '=':
+            name = cur_line[:leading_symbol_loc].strip()
+            cur_line = cur_line[leading_symbol_loc + 1:]
+            self.names_stack.append(name)
+
+            cur_line, context[name] = self.process(cur_line, context) # Get the assign target and add to context
+            self.names_stack.pop()
+            return cur_line, context # Let an assignment return the value of the assigned
+
+        elif leading_symbol == '"':
+            closing_quote_loc = cur_line[leading_symbol_loc + 1:].find('"')
+            line = cur_line[closing_quote_loc + 1:] # Advance line past the closing quote
+            value = cur_line[leading_symbol_loc + 1:closing_quote_loc + 2].strip() # Slice value between quotes
+            closing_comma_loc = line.find(',') # Find closing comma of this assignment
+            line = line[closing_comma_loc + 1:].lstrip() # Advance line past closing comma
+            return line, value
+        elif leading_symbol == ',':
+            return cur_line[leading_symbol_loc + 1:], cur_line[:leading_symbol_loc] # Return literal val
 
     def find_assignment_or_table(self, code: typing.IO, cur_line: str):
         """Processes unassigned tables and assignments of tables to a name"""

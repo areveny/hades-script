@@ -23,59 +23,88 @@ class Ingestion():
 
     delimiting_symbols = {'--', '{', '}', '=', '"', ','}
 
-    def process(self, cur_line: str, context: dict) -> typing.Tuple[str, dict]:
-        print(cur_line, context)
-
+    def next_symbol(line):
         locs: typing.Dict[int, str] = dict()
         for symbol in Ingestion.delimiting_symbols:
-            locs[cur_line.find(symbol)] = symbol
+            locs[line.find(symbol)] = symbol
         
         found_symbols = [i for i in locs.keys() if i != -1]
         if len(found_symbols) == 0:
-            return self.process(next(self.code_lines), context)
+            return None, None
 
         leading_symbol_loc = min(found_symbols)
         leading_symbol = locs[leading_symbol_loc]
 
-        if leading_symbol == '--':
-            return '', None
-        elif leading_symbol == '{':
-            nested_context = dict()
-            cur_line = cur_line[cur_line.find('{') + 1:] # Get everything after the open bracket
-            cur_line, result_context = self.process(cur_line, nested_context) # Create new context
-            while result_context:
+        return leading_symbol, leading_symbol_loc
+
+    def process(self, cur_line: str, context: dict) -> typing.Tuple[str, dict]:
+        print(cur_line, context)
+        print(self.names_stack)
+        if 'Cooldowns' in self.names_stack:
+            breakpoint()
+            # raise StopIteration
+            pass
+
+        while True:
+            cur_line = cur_line.strip()
+            leading_symbol, leading_symbol_loc = Ingestion.next_symbol(cur_line)
+            if leading_symbol is None:
+                cur_line = next(self.code_lines)
+                continue
+
+            if leading_symbol == '--':
+                cur_line = next(self.code_lines)
+                continue
+            elif leading_symbol == '{':
+                nested_context = dict()
+                cur_line = cur_line[leading_symbol_loc + 1:]
                 cur_line, result_context = self.process(cur_line, nested_context) # Create new context
-            # The cur_line is already advanced in the base case below
-            return cur_line, nested_context
-            # Test if nested object is a viable Cue, then process it
-        elif leading_symbol == '}':
-            return cur_line[leading_symbol_loc:], None # Close the context
+                while result_context:
+                    cur_line, result_context = self.process(cur_line, nested_context) # Create new context
+                # The cur_line is already advanced in the base case below
+                return cur_line, nested_context
+                # Test if nested object is a viable Cue, then process it
+            elif leading_symbol == '}':
+                if leading_symbol_loc == 0:
+                    return cur_line[leading_symbol_loc + 1:], None # Close the context
+                else:
+                    return cur_line[leading_symbol_loc:], cur_line[:leading_symbol_loc].strip() # Return literal val
 
-        elif leading_symbol == '=':
-            name = cur_line[:leading_symbol_loc].strip()
-            cur_line = cur_line[leading_symbol_loc + 1:]
-            self.names_stack.append(name)
+            elif leading_symbol == '=':
+                name = cur_line[:leading_symbol_loc].strip()
+                cur_line = cur_line[leading_symbol_loc + 1:]
+                self.names_stack.append(name)
 
-            cur_line, context[name] = self.process(cur_line, context) # Get the assign target and add to context
-            self.names_stack.pop()
-            return cur_line, context # Let an assignment return the value of the assigned
+                cur_line, context[name] = self.process(cur_line, context) # Get the assign target and add to context
+                self.names_stack.pop()
+                return cur_line, context # Let an assignment return the value of the assigned
 
-        elif leading_symbol == '"':
-            closing_quote_loc = cur_line[leading_symbol_loc + 1:].find('"')
-            line = cur_line[closing_quote_loc + 1:] # Advance line past the closing quote
-            value = cur_line[leading_symbol_loc + 1:closing_quote_loc + 2].strip() # Slice value between quotes
-            closing_comma_loc = line.find(',') # Find closing comma of this assignment
-            line = line[closing_comma_loc + 1:].lstrip() # Advance line past closing comma
-            return line, value
-        elif leading_symbol == ',':
-            return cur_line[leading_symbol_loc + 1:], cur_line[:leading_symbol_loc] # Return literal val
+            elif leading_symbol == '"':
+                closing_quote_loc = cur_line[leading_symbol_loc + 1:].find('"')
+                line = cur_line[closing_quote_loc + 1:] # Advance line past the closing quote
+                value = cur_line[leading_symbol_loc + 1:closing_quote_loc + 2].strip() # Slice value between quotes
+                closing_comma_loc = line.find(',') # Find closing comma of this assignment
+                line = line[closing_comma_loc + 1:].lstrip() # Advance line past closing comma
+                return line, value
+            elif leading_symbol == ',':
+                # If we detect no more content, .e.g. just ',', advance line. There must be more
+                remainder = cur_line[leading_symbol_loc + 1:]
+                # leading_symbol, leading_symbol_loc = Ingestion.next_symbol(remainder)
+
+                if leading_symbol_loc == 0:
+                    cur_line = next(self.code_lines)
+                    continue
+
+                # If there is content, consume up to it
+                # Case where remainder is '}' or more data after comma
+                return cur_line[leading_symbol_loc + 1:], cur_line[:leading_symbol_loc].strip() # Return literal val
 
     def find_assignment_or_table(self, code: typing.IO, cur_line: str):
         """Processes unassigned tables and assignments of tables to a name"""
         print(self.names_stack, cur_line[:-1])
         # if "HadesPostFlashback01" in self.names_stack:
         if "TemporaryImprovedWeaponTrait_Patroclus" in cur_line:
-            breakpoint()
+            # breakpoint()
             # raise StopIteration
             pass
         while code:

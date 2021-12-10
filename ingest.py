@@ -11,7 +11,11 @@ class Ingestion():
         f = open(file, 'r')
         self.code_lines = iter(f)
         root_context = dict()
-        self.process(next(self.code_lines), root_context)
+        try:
+            self.process(next(self.code_lines), root_context)
+        except StopIteration:
+            return
+
         print(root_context)
 
     def populate(self, code: typing.IO):
@@ -38,14 +42,10 @@ class Ingestion():
         return leading_symbol, leading_symbol_loc
 
     def process(self, cur_line: str, context: dict) -> typing.Tuple[str, dict]:
-        print(cur_line, context)
-        print(self.names_stack)
-        if 'Cooldowns' in self.names_stack:
-            breakpoint()
-            # raise StopIteration
-            pass
-
         while True:
+            # print(cur_line.strip())
+            # print(cur_line.strip(), context)
+            # print(self.names_stack)
             cur_line = cur_line.strip()
             leading_symbol, leading_symbol_loc = Ingestion.next_symbol(cur_line)
             if leading_symbol is None:
@@ -77,20 +77,23 @@ class Ingestion():
 
                 cur_line, context[name] = self.process(cur_line, context) # Get the assign target and add to context
                 self.names_stack.pop()
+                print(context[name])
                 return cur_line, context # Let an assignment return the value of the assigned
 
             elif leading_symbol == '"':
                 closing_quote_loc = cur_line[leading_symbol_loc + 1:].find('"')
                 line = cur_line[closing_quote_loc + 1:] # Advance line past the closing quote
-                value = cur_line[leading_symbol_loc + 1:closing_quote_loc + 2].strip() # Slice value between quotes
+                value = cur_line[leading_symbol_loc + 1:closing_quote_loc + 1].strip() # Slice value between quotes
                 closing_comma_loc = line.find(',') # Find closing comma of this assignment
-                line = line[closing_comma_loc + 1:].lstrip() # Advance line past closing comma
+                closing_bracket_loc = line.find('}') # Find oossible bracket
+                if closing_bracket_loc < closing_comma_loc:
+                    closing_loc = closing_bracket_loc
+                else:
+                    closing_loc = closing_comma_loc + 1
+                line = line[closing_loc:].lstrip() # Advance line past closing
                 return line, value
             elif leading_symbol == ',':
-                # If we detect no more content, .e.g. just ',', advance line. There must be more
-                remainder = cur_line[leading_symbol_loc + 1:]
-                # leading_symbol, leading_symbol_loc = Ingestion.next_symbol(remainder)
-
+                # If we detect no more content, .e.g. just ',', advance line. There might be more
                 if leading_symbol_loc == 0:
                     cur_line = next(self.code_lines)
                     continue

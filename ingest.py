@@ -12,11 +12,11 @@ class Ingestion():
         self.code_lines = iter(f)
         root_context = dict()
         try:
-            self.process(next(self.code_lines), root_context)
+            while True:
+                self.process(next(self.code_lines), root_context)
         except StopIteration:
             return
 
-        print(root_context)
 
     def populate(self, code: typing.IO):
         try:
@@ -44,13 +44,20 @@ class Ingestion():
     def process(self, cur_line: str, context: dict) -> typing.Tuple[str, dict]:
         while True:
             # print(cur_line.strip())
-            # print(cur_line.strip(), context)
+            # print(self.names_stack)
+            # print(cur_line.strip())
+            if '[1]' in cur_line:
+                # breakpoint()
+                pass
             # print(self.names_stack)
             cur_line = cur_line.strip()
             leading_symbol, leading_symbol_loc = Ingestion.next_symbol(cur_line)
             if leading_symbol is None:
-                cur_line = next(self.code_lines)
-                continue
+                if len(cur_line) > 0:
+                    return '', cur_line # There might be content that needs to be interpreted as a literal
+                else:
+                    cur_line = next(self.code_lines)
+                    continue
 
             if leading_symbol == '--':
                 cur_line = next(self.code_lines)
@@ -61,6 +68,8 @@ class Ingestion():
                 cur_line, result_context = self.process(cur_line, nested_context) # Create new context
                 while result_context:
                     cur_line, result_context = self.process(cur_line, nested_context) # Create new context
+                if 'Cue' in nested_context:
+                    print(nested_context)
                 # The cur_line is already advanced in the base case below
                 return cur_line, nested_context
                 # Test if nested object is a viable Cue, then process it
@@ -77,7 +86,6 @@ class Ingestion():
 
                 cur_line, context[name] = self.process(cur_line, context) # Get the assign target and add to context
                 self.names_stack.pop()
-                print(context[name])
                 return cur_line, context # Let an assignment return the value of the assigned
 
             elif leading_symbol == '"':

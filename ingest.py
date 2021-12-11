@@ -17,7 +17,6 @@ class Ingestion():
         except StopIteration:
             return
 
-
     def populate(self, code: typing.IO):
         try:
             while True:
@@ -46,10 +45,6 @@ class Ingestion():
             # print(cur_line.strip())
             # print(self.names_stack)
             # print(cur_line.strip())
-            if '[1]' in cur_line:
-                # breakpoint()
-                pass
-            # print(self.names_stack)
             cur_line = cur_line.strip()
             leading_symbol, leading_symbol_loc = Ingestion.next_symbol(cur_line)
             if leading_symbol is None:
@@ -69,6 +64,8 @@ class Ingestion():
                 while result_context:
                     cur_line, result_context = self.process(cur_line, nested_context) # Create new context
                 if 'Cue' in nested_context:
+                    pass
+                    print(self.names_stack[-1])
                     print(nested_context)
                 # The cur_line is already advanced in the base case below
                 return cur_line, nested_context
@@ -90,7 +87,7 @@ class Ingestion():
 
             elif leading_symbol == '"':
                 closing_quote_loc = cur_line[leading_symbol_loc + 1:].find('"')
-                line = cur_line[closing_quote_loc + 1:] # Advance line past the closing quote
+                line = cur_line[closing_quote_loc + 2:] # Advance line past the closing quote
                 value = cur_line[leading_symbol_loc + 1:closing_quote_loc + 1].strip() # Slice value between quotes
                 closing_comma_loc = line.find(',') # Find closing comma of this assignment
                 closing_bracket_loc = line.find('}') # Find oossible bracket
@@ -109,110 +106,6 @@ class Ingestion():
                 # If there is content, consume up to it
                 # Case where remainder is '}' or more data after comma
                 return cur_line[leading_symbol_loc + 1:], cur_line[:leading_symbol_loc].strip() # Return literal val
-
-    def find_assignment_or_table(self, code: typing.IO, cur_line: str):
-        """Processes unassigned tables and assignments of tables to a name"""
-        print(self.names_stack, cur_line[:-1])
-        # if "HadesPostFlashback01" in self.names_stack:
-        if "TemporaryImprovedWeaponTrait_Patroclus" in cur_line:
-            # breakpoint()
-            # raise StopIteration
-            pass
-        while code:
-            comment_loc = cur_line.find('--')
-            bracket_loc = cur_line.find('{')
-            close_bracket_loc = cur_line.find('}')
-            assign_loc = cur_line.find('=')
-
-            if comment_loc != -1 and comment_loc < bracket_loc and comment_loc < assign_loc:
-                cur_line = next(code)
-                continue
-            if bracket_loc != -1 and \
-                    not(assign_loc != -1 and assign_loc < bracket_loc): # Found unassigned table 
-                cur_line = '{'.join(cur_line.split('{')[1:]) # Get everything after the open bracket
-                self.find_assignment_or_table(code, cur_line)
-                cur_line = '}'.join(cur_line.split('}')[1:]) # Get everything after the close bracket
-
-            if " Cue " in cur_line:
-                parsed_object = self.process_voice_line(code, cur_line)
-                print(parsed_object)
-
-                if self.ingestion_db.can_process_object(parsed_object):
-                    try:
-                        self.data_objects.append({'line_name': parsed_object['Cue'], 
-                            'conversation_name': self.names_stack[-1], 
-                            'speaker': get_speaker_from_name(parsed_object['Cue']),
-                            'text': parsed_object['Text']})
-                    except KeyError:
-                        pass
-                return
-
-            if assign_loc != -1 and \
-                    not(close_bracket_loc != -1 and close_bracket_loc < assign_loc): # Found assignment
-                split_line = cur_line.split(' =')
-                candidate_name = split_line[0].strip()
-                cur_line = ' ='.join(split_line[1:])
-
-                # Try and find out if we have a table or a simple assignment
-                while code:
-                    if '{' in cur_line: # Table
-                        cur_line = cur_line[cur_line.find('{') + 1:] # Get everything after the open bracket
-                        self.names_stack.append(candidate_name)
-                        self.find_assignment_or_table(code, cur_line)
-                        self.names_stack.pop()
-                        cur_line = cur_line[cur_line.find('}') + 1:] # Get everything after the close bracket
-                        break
-                    elif ',' in cur_line: # Found ',' before '}': simple assignment
-                        break
-
-                    cur_line = next(code)
-
-            if '}' in cur_line and '--' not in cur_line:
-                return
-
-            cur_line = next(code)
-
-    def process_db(self):
-        return
-
-    def process_voice_line(self, code, cur_line):
-        """Converts the `Cue` object starting at cur_line from code to an object"""
-        cur_object = dict()
-        while True:
-            Ingestion.set_key_values(cur_line, cur_object) # Consume assignments from line
-            
-            if '}' in cur_line: # Done with this assignment
-                return cur_object
-            
-            cur_line = next(code)
-
-    def set_key_values(line, object: dict):
-        """Extracts assignments in `line` into object"""
-        while '=' in line: # More assignments exist in remaining line
-            key, value, line = Ingestion.consume_assignment_in_line(line)
-            object[key] = value
-
-    def consume_assignment_in_line(line: str):
-        """Pulls out the first assignment in a line and returns the remaining line"""
-        end_assignment = line.find('=') # Find the end of the assignment statement
-        name = line[:end_assignment].strip()
-
-        line = line[end_assignment + 1:].strip() # Advance line past assignment
-
-        comma_loc = line.find(',')
-        quote_loc = line.find('"')
-        if quote_loc < comma_loc and quote_loc >= 0: # String assigned
-            closing_quote_loc = line[quote_loc + 1:].find('"')
-            value = line[quote_loc + 1:closing_quote_loc + 1].strip() # Slice value between quotes
-            line = line[closing_quote_loc + 1:] # Advance line past the closing quote
-            closing_comma_loc = line.find(',') # Find closing comma of this assignment
-            line = line[closing_comma_loc + 1:].lstrip() # Advance line past closing comma
-
-        else: # Non-string assigned
-            value = line[:comma_loc].strip()
-            line = line[comma_loc:]
-
-        return (name, value, line)
 
 def get_speaker_from_name(line_name):
     if 'Zagreus' in line_name:

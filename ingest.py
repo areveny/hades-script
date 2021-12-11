@@ -44,7 +44,6 @@ class Ingestion():
         while True:
             # print(cur_line.strip())
             # print(self.names_stack)
-            # print(cur_line.strip())
             cur_line = cur_line.strip()
             leading_symbol, leading_symbol_loc = Ingestion.next_symbol(cur_line)
             if leading_symbol is None:
@@ -64,9 +63,9 @@ class Ingestion():
                 while result_context:
                     cur_line, result_context = self.process(cur_line, nested_context) # Create new context
                 if 'Cue' in nested_context:
-                    pass
                     print(self.names_stack[-1])
                     print(nested_context)
+                    pass
                 # The cur_line is already advanced in the base case below
                 return cur_line, nested_context
                 # Test if nested object is a viable Cue, then process it
@@ -100,7 +99,7 @@ class Ingestion():
             elif leading_symbol == ',':
                 # If we detect no more content, .e.g. just ',', advance line. There might be more
                 if leading_symbol_loc == 0:
-                    cur_line = next(self.code_lines)
+                    cur_line = cur_line[1:]
                     continue
 
                 # If there is content, consume up to it

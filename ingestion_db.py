@@ -30,7 +30,7 @@ class SqliteIngestionDB(IngestionDB):
         con.close()
 
     def can_process_object(self, obj):
-        return 'Cue' in obj and 'Text' in obj
+        return obj and isinstance(obj, dict) and 'Cue' in obj and 'Text' in obj
 
     def process_lines_dataset(self, line_data):
         db_values = [(line_data['line_name'], line_data['conversation_name'], line_data['speaker'], line_data['text'])]

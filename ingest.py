@@ -7,6 +7,7 @@ class Ingestion():
     def __init__(self, file, ingestion_db):
         self.names_stack = list()
         self.ingestion_db = ingestion_db
+        self.db_lines = list()
 
         f = open(file, 'r')
         self.code_lines = iter(f)
@@ -42,8 +43,6 @@ class Ingestion():
 
     def process(self, cur_line: str, context: dict) -> typing.Tuple[str, dict]:
         while True:
-            # print(cur_line.strip())
-            # print(self.names_stack)
             cur_line = cur_line.strip()
             leading_symbol, leading_symbol_loc = Ingestion.next_symbol(cur_line)
             if leading_symbol is None:
@@ -59,13 +58,16 @@ class Ingestion():
             elif leading_symbol == '{':
                 nested_context = dict()
                 cur_line = cur_line[leading_symbol_loc + 1:]
-                cur_line, result_context = self.process(cur_line, nested_context) # Create new context
+                result_context = True
                 while result_context:
                     cur_line, result_context = self.process(cur_line, nested_context) # Create new context
-                if 'Cue' in nested_context:
-                    print(self.names_stack[-1])
-                    print(nested_context)
-                    pass
+                    if (not cur_line or cur_line == ',') and self.ingestion_db.can_process_object(result_context):
+                        db_line = (result_context['Cue'], 
+                            self.names_stack[-1], 
+                            get_speaker_from_name(result_context['Cue']),
+                            result_context['Text'])
+                        print(db_line)
+                        self.db_lines.append(db_line)
                 # The cur_line is already advanced in the base case below
                 return cur_line, nested_context
                 # Test if nested object is a viable Cue, then process it
@@ -80,7 +82,8 @@ class Ingestion():
                 cur_line = cur_line[leading_symbol_loc + 1:]
                 self.names_stack.append(name)
 
-                cur_line, context[name] = self.process(cur_line, context) # Get the assign target and add to context
+                cur_line, result_context = self.process(cur_line, context) # Get the assign target and add to context
+                context[name] = result_context
                 self.names_stack.pop()
                 return cur_line, context # Let an assignment return the value of the assigned
 
@@ -97,7 +100,7 @@ class Ingestion():
                 line = line[closing_loc:].lstrip() # Advance line past closing
                 return line, value
             elif leading_symbol == ',':
-                # If we detect no more content, .e.g. just ',', advance line. There might be more
+                # If we detect no content before the comma, advance on
                 if leading_symbol_loc == 0:
                     cur_line = cur_line[1:]
                     continue

@@ -16,7 +16,8 @@ class Ingestion():
             while True:
                 self.process(next(self.code_lines), root_context)
         except StopIteration:
-            return
+            pass
+        self.ingestion_db.upload_lines(self.db_lines)
 
     def populate(self, code: typing.IO):
         try:
@@ -66,7 +67,6 @@ class Ingestion():
                             self.names_stack[-1], 
                             get_speaker_from_name(result_context['Cue']),
                             result_context['Text'])
-                        print(db_line)
                         self.db_lines.append(db_line)
                 # The cur_line is already advanced in the base case below
                 return cur_line, nested_context

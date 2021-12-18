@@ -17,14 +17,8 @@ class Ingestion():
                 self.process(next(self.code_lines), root_context)
         except StopIteration:
             pass
+        f.close()
         self.ingestion_db.upload_lines(self.db_lines)
-
-    def populate(self, code: typing.IO):
-        try:
-            while True:
-                self.process(next(self.code_lines))
-        except StopIteration:
-            return
 
     delimiting_symbols = {'--', '{', '}', '=', '"', ','}
 
@@ -118,3 +112,4 @@ def get_speaker_from_name(line_name):
 if __name__ == '__main__':
     sqllite_ingestion = SqliteIngestionDB('hades-index.db')
     npc_ingest = Ingestion('raw-data/NPCData.lua', sqllite_ingestion)
+    loot_ingest = Ingestion('raw-data/LootData.lua', sqllite_ingestion)

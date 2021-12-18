@@ -104,8 +104,12 @@ class Ingestion():
                 return cur_line[leading_symbol_loc + 1:], cur_line[:leading_symbol_loc].strip() # Return literal val
 
 def get_speaker_from_name(line_name):
-    if 'Zagreus' in line_name:
+    if 'Megaera' in line_name:
+        return 'Megaera'
+    elif 'Zagreus' in line_name:
         return 'Zagreus'
+    elif 'Thanatos' in line_name:
+        return 'Thanatos'
     else:
         return line_name[4:line_name.find('_')]
 

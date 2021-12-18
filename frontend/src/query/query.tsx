@@ -2,13 +2,15 @@ import React from 'react';
 import Display from './display/display';
 import './query.css';
 
-const speakers = ["Artemis", "Zagreus", "Zeus", "Athena", "Aphrodite", "Ares", "Hades", "Demeter", "Dusa"]
+const houseSpeakers = ['Achilles', 'Charon', 'Dusa', 'Eurydice', 'Hades', 'Hypnos', 'Megaera', 'Nyx', 'Orpheus', 'Patroclus', 'Persephone', 'Sisyphus', 'Storyteller', 'Thanatos', 'Zagreus']
+const godSpeakers = ['Aphrodite', 'Ares', 'Artemis', 'Athena', 'Chaos', 'Demeter', 'Dionysus', 'Hermes', 'Poseidon', 'Zeus']
 const colors: {[key: string]: string} = {"Artemis": "green",
                                       "Zagreus": "red"
   };
 
 interface QueryState {
   selectedSpeakers: Set<string>
+  matchString: string;
 }
 
 class Query extends React.Component<any, QueryState> {
@@ -17,7 +19,8 @@ class Query extends React.Component<any, QueryState> {
 
   constructor(props: any) {
     super(props)
-    this.state = {"selectedSpeakers": new Set<string>()}
+    this.state = {"selectedSpeakers": new Set<string>(),
+                  'matchString': ''}
   }
 
   getColor(speaker: string) {
@@ -40,22 +43,43 @@ class Query extends React.Component<any, QueryState> {
         clonedMap.add(speaker)
       }
       this.setState({"selectedSpeakers": clonedMap})
-      console.log(this.state.selectedSpeakers)
+  }
+
+  handleChange = (e: React.FormEvent) => {
+    var element = (e.currentTarget as HTMLButtonElement)
+    this.setState({'matchString': element.value})
   }
 
   render() {
     return (
       <div className="query">
         <div className="selectors">
-          {speakers.map((speaker: string) => {
-            return <button className="speaker-select"
-              key={speaker} value={speaker}
-              onClick={this.selectSpeaker}>
-              {speaker}
-            </button>
-          })}
+          <div className='godSelectors'>
+            {godSpeakers.map((speaker: string) => {
+              return <button className="speaker-select"
+                key={speaker} value={speaker}
+                onClick={this.selectSpeaker}>
+                {speaker}
+              </button>
+            })}
+          </div>
+          <div className='houseSelectors'>
+            {houseSpeakers.map((speaker: string) => {
+              return <button className="speaker-select"
+                key={speaker} value={speaker}
+                onClick={this.selectSpeaker}>
+                {speaker}
+              </button>
+            })}
+          </div>
         </div>
-        <Display selectedSpeakers={this.state.selectedSpeakers} />
+        <div className="matchString">
+          <label>
+            Match text:
+            <input type='text' value={this.state.matchString} onChange={this.handleChange} />
+          </label>
+        </div>
+        <Display selectedSpeakers={this.state.selectedSpeakers} matchString={this.state.matchString} />
       </div>
     );
   }

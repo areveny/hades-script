@@ -4,6 +4,7 @@ import './display.css';
 
 interface DisplayProps {
   selectedSpeakers: Set<string>;
+  matchString: string;
 }
 
 interface DisplayState {
@@ -12,7 +13,7 @@ interface DisplayState {
 
 interface Result {
   line_name: string;
-  conversation: string;
+  conversation_name: string;
   speaker: string;
   text: string;
 }
@@ -28,39 +29,46 @@ class Display extends React.PureComponent<DisplayProps, DisplayState> {
   addsStuffQuery = () => {
     this.setState({ 'results': new Array<Result>()}, () => {
       axios.post('http://localhost:4000/',
-        {'selectedSpeakers': Array.from(this.props.selectedSpeakers)},
+        {'selectedSpeakers': Array.from(this.props.selectedSpeakers), 
+          'matchString': this.props.matchString},
         { headers: { 'Content-Type': 'application/json' } })
         .then((response) => {
-          console.log(response.data)
           this.setState({ 'results': response.data })
         })
     })
   }
 
   componentDidUpdate(prevProps: DisplayProps) {
-    if (this.props.selectedSpeakers !== prevProps.selectedSpeakers &&
-        this.props.selectedSpeakers.size > 0) {
+    if ((this.props.selectedSpeakers !== prevProps.selectedSpeakers &&
+        this.props.selectedSpeakers.size > 0) ||
+        (this.props.matchString !== prevProps.matchString && this.props.matchString !== '')
+     ) {
       this.addsStuffQuery()
     }
   }
 
-  convertFormatting = (line: string) => {
-    // "I {#DialogueItalicFormat}do {#PreviousFormat}have feelings for you, silly! That's what I've been trying to tell you, it's just... it's just...".indexOf('{#DialogueItalicFormat}')
+  convertFormatting = (line: string, line_name: string) => {
     var formatStart = line.indexOf('{#DialogueItalicFormat}')
-    var output = new Array();
+    var output = [];
+    var index = 0;
     while (formatStart !== -1) {
       var before = line.substring(0, formatStart)
       var formatCloseStart = line.indexOf('{#PreviousFormat}')
+      if (formatCloseStart === -1) {
+        output.push(<i key={index}>{line.substring(formatStart + 23)}</i>)
+        line = ''
+        break
+      }
       var formatted = line.substring(formatStart + 23, formatCloseStart)
       output.push(before)
-      output.push(<i>{formatted}</i>)
+      output.push(<i key={index}>{formatted}</i>)
 
-      var line = line.substring(formatCloseStart + 17)
-      var formatStart = line.indexOf('{#DialogueItalicFormat}')
+      index = index + 1
+      line = line.substring(formatCloseStart + 17)
+      formatStart = line.indexOf('{#DialogueItalicFormat}')
     }
     output.push(line)
-    return React.createElement('p', { 'className': 'text' }, output)
-    // return line.replaceAll('{#DialogueItalicFormat}', '<i>').replaceAll('{#PreviousFormat}', '</i>')
+    return React.createElement('p', { 'className': 'text-element', 'key': line_name + '-text'}, output)
   }
 
   render() {
@@ -68,9 +76,11 @@ class Display extends React.PureComponent<DisplayProps, DisplayState> {
       <div className='display'>
         {this.state.results.map((result: Result) => {
           return (
-            <div key={result.line_name.concat('-speaker')}>
-              <p className='speakerName' key={result.line_name + '-' + result.speaker}>{result.speaker}</p>
-              <p key={result.line_name}>{this.convertFormatting(result.text)}</p>
+            <div key={result.line_name}>
+              <span className='speakerName' key={result.line_name + '-' + result.speaker}>{result.speaker}</span>
+              <span className='conversationName' key={result.line_name + '-' + result.conversation_name}>{result.conversation_name}</span>
+              <br />
+              <div className='text' key={result.line_name + '-container'}>{this.convertFormatting(result.text, result.line_name)}</div>
             </div>
           )
         })}

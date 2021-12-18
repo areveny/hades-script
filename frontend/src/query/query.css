@@ -4,6 +4,10 @@
     white-space: wrap;
 }
 
+.selectors {
+  margin-bottom: 10px;
+}
+
 .speaker-select {
   border: 0px;
   border-radius: 0px;
@@ -11,5 +15,5 @@
   margin-right: 2px;
   margin-bottom: 2px;
   background-color: green;
-  font-size: 2vw;
+  font-size: min(20px, 3vw);
 }

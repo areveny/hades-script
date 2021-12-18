@@ -11,11 +11,17 @@ app.use(express.json())
 const port = 4000
 
 function getQuery(queryProps) {
-    var filters = ""
+    var filters = []
     if (queryProps.selectedSpeakers.length > 0) {
-        filters = ` WHERE speaker IN ("${queryProps.selectedSpeakers.join("\", \"")}")`
+        filters.push(` speaker IN ("${queryProps.selectedSpeakers.join("\", \"")}")`)
     }
-    var query = `SELECT * FROM lines${filters};`
+    if (queryProps.matchString !== '') {
+        filters.push(` text LIKE "%${queryProps.matchString}%"`)
+    }
+    if (filters.length > 0) {
+        filterText = ` WHERE ${filters.join(' AND ')}`
+    }
+    var query = `SELECT * FROM lines ${filterText} LIMIT 100;`
     console.log(query)
     return query
 }

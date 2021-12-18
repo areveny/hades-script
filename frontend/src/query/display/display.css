@@ -9,9 +9,12 @@
 }
 
 .speakerName {
+    float: left;
     font-size: small;
 }
 
-p > i {
-    font-style: italic;
+.conversationName {
+    float: right;
+    font-size: small;
 }
+

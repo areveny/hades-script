@@ -45,10 +45,21 @@ class Display extends React.PureComponent<DisplayProps, DisplayState> {
   }
 
   convertFormatting = (line: string) => {
-    if (line.match('{')) {
-      return (<i>line</i>)
+    // "I {#DialogueItalicFormat}do {#PreviousFormat}have feelings for you, silly! That's what I've been trying to tell you, it's just... it's just...".indexOf('{#DialogueItalicFormat}')
+    var formatStart = line.indexOf('{#DialogueItalicFormat}')
+    var output = new Array();
+    while (formatStart !== -1) {
+      var before = line.substring(0, formatStart)
+      var formatCloseStart = line.indexOf('{#PreviousFormat}')
+      var formatted = line.substring(formatStart + 23, formatCloseStart)
+      output.push(before)
+      output.push(<i>{formatted}</i>)
+
+      var line = line.substring(formatCloseStart + 17)
+      var formatStart = line.indexOf('{#DialogueItalicFormat}')
     }
-    return line
+    output.push(line)
+    return React.createElement('p', { 'className': 'text' }, output)
     // return line.replaceAll('{#DialogueItalicFormat}', '<i>').replaceAll('{#PreviousFormat}', '</i>')
   }
 

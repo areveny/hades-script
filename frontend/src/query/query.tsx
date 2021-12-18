@@ -2,7 +2,7 @@ import React from 'react';
 import Display from './display/display';
 import './query.css';
 
-const speakers = ["Artemis", "Zagreus", "Zeus", "Athena", "Aphrodite", "Ares", "Hades", "Demeter"]
+const speakers = ["Artemis", "Zagreus", "Zeus", "Athena", "Aphrodite", "Ares", "Hades", "Demeter", "Dusa"]
 const colors: {[key: string]: string} = {"Artemis": "green",
                                       "Zagreus": "red"
   };

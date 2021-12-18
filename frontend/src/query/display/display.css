@@ -1,0 +1,17 @@
+.display {
+    width: 80%;
+    display: inline-block;
+    justify-content: center;
+}
+
+.display p {
+    text-align: justify;
+}
+
+.speakerName {
+    font-size: small;
+}
+
+p > i {
+    font-style: italic;
+}

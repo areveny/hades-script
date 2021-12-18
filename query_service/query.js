@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const sqlite3 = require('sqlite3')
+const { performance } = require('perf_hooks')
 
 var db = new sqlite3.Database('../hades-index.db')
 
@@ -8,6 +9,17 @@ const app = express()
 app.use(cors({'origin': true}))
 app.use(express.json())
 const port = 4000
+
+function getQuery(queryProps) {
+    var filters = ""
+    if (queryProps.selectedSpeakers.length > 0) {
+        filters = ` WHERE speaker IN ("${queryProps.selectedSpeakers.join("\", \"")}")`
+    }
+    var query = `SELECT * FROM lines${filters};`
+    console.log(query)
+    return query
+}
+
 
 app.get("/", (req, res) => {
 
@@ -18,14 +30,13 @@ app.get("/", (req, res) => {
 })
 
 app.post("/", (req, res) => {
-    console.log(req.body)
-    res.json(req.body)
-    // db.all(req.body.query, function(err, rows) {
-    //     console.log(rows)
-    //     res.json(req.body.query)
-    // })
-
-    }
+    var startTime = performance.now()
+    db.all(getQuery(req.body), function (err, rows) {
+        res.json(rows)
+    })
+    var endTime = performance.now()
+    console.log(`${JSON.stringify(req.body)} took  ${endTime - startTime}`)
+}
 )
 
 app.listen(port, () => {

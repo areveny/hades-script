@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import Result from '../../models/models';
 import './display.css';
 
 interface DisplayProps {
@@ -11,15 +12,9 @@ interface DisplayState {
   results: Result[];
 }
 
-interface Result {
-  line_name: string;
-  conversation_name: string;
-  speaker: string;
-  text: string;
-}
 
 // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization
-class Display extends React.PureComponent<DisplayProps, DisplayState> {
+class Display extends React.Component<DisplayProps, DisplayState> {
 
   constructor(props: DisplayProps) {
     super(props)
@@ -47,30 +42,6 @@ class Display extends React.PureComponent<DisplayProps, DisplayState> {
     }
   }
 
-  convertFormatting = (line: string, line_name: string) => {
-    var formatStart = line.indexOf('{#DialogueItalicFormat}')
-    var output = [];
-    var index = 0;
-    while (formatStart !== -1) {
-      var before = line.substring(0, formatStart)
-      var formatCloseStart = line.indexOf('{#PreviousFormat}')
-      if (formatCloseStart === -1) {
-        output.push(<i key={index}>{line.substring(formatStart + 23)}</i>)
-        line = ''
-        break
-      }
-      var formatted = line.substring(formatStart + 23, formatCloseStart)
-      output.push(before)
-      output.push(<i key={index}>{formatted}</i>)
-
-      index = index + 1
-      line = line.substring(formatCloseStart + 17)
-      formatStart = line.indexOf('{#DialogueItalicFormat}')
-    }
-    output.push(line)
-    return React.createElement('p', { 'className': 'text-element', 'key': line_name + '-text'}, output)
-  }
-
   render() {
     return (
       <div className='display'>
@@ -80,7 +51,7 @@ class Display extends React.PureComponent<DisplayProps, DisplayState> {
               <span className='speakerName' key={result.line_name + '-' + result.speaker}>{result.speaker}</span>
               <span className='conversationName' key={result.line_name + '-' + result.conversation_name}>{result.conversation_name}</span>
               <br />
-              <div className='text' key={result.line_name + '-container'}>{this.convertFormatting(result.text, result.line_name)}</div>
+              <div className='text' key={result.line_name + '-container'}>{convertFormatting(result.text, result.line_name)}</div>
             </div>
           )
         })}
@@ -89,4 +60,30 @@ class Display extends React.PureComponent<DisplayProps, DisplayState> {
   }
 }
 
-export default Display;
+function convertFormatting(line: string, line_name: string) {
+  var formatStart = line.indexOf('{#DialogueItalicFormat}')
+  var output = [];
+  var index = 0;
+  while (formatStart !== -1) {
+    var before = line.substring(0, formatStart)
+    var formatCloseStart = line.indexOf('{#PreviousFormat}')
+    if (formatCloseStart === -1) {
+      output.push(<i key={index}>{line.substring(formatStart + 23)}</i>)
+      line = ''
+      break
+    }
+    var formatted = line.substring(formatStart + 23, formatCloseStart)
+    output.push(before)
+    output.push(<i key={index}>{formatted}</i>)
+
+      index = index + 1
+      line = line.substring(formatCloseStart + 17)
+      formatStart = line.indexOf('{#DialogueItalicFormat}')
+    }
+    output.push(line)
+    return React.createElement('p', { 'className': 'text-element', 'key': line_name + '-text'}, output)
+  }
+
+
+export default Display; 
+export {convertFormatting};

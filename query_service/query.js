@@ -35,6 +35,16 @@ app.get("/", (req, res) => {
 
 })
 
+app.post("/conversation", (req, res) => {
+    console.log(req.body)
+    db.all(`SELECT * FROM lines WHERE conversation_name='${req.body.conversation_name}'`, 
+    function (err, rows) {
+        res.json(rows)
+    })
+    var endTime = performance.now()
+}
+)
+
 app.post("/", (req, res) => {
     var startTime = performance.now()
     db.all(getQuery(req.body), function (err, rows) {
@@ -44,6 +54,7 @@ app.post("/", (req, res) => {
     console.log(`${JSON.stringify(req.body)} took  ${endTime - startTime}`)
 }
 )
+
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)

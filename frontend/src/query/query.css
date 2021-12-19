@@ -2,6 +2,7 @@
     display: inline-block; 
     justify-content: center; 
     white-space: wrap;
+    width: 80%;
 }
 
 .selectors {
@@ -14,6 +15,6 @@
   margin-left: 2px;
   margin-right: 2px;
   margin-bottom: 2px;
-  background-color: green;
+  background-color: white;
   font-size: min(20px, 3vw);
 }

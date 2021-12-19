@@ -37,7 +37,7 @@ app.get("/", (req, res) => {
 
 app.post("/conversation", (req, res) => {
     console.log(req.body)
-    db.all(`SELECT * FROM lines WHERE conversation_name='${req.body.conversation_name}'`, 
+    db.all(`SELECT * FROM lines WHERE conversation_name='${req.body.conversation_name}' ORDER BY rowid`, 
     function (err, rows) {
         res.json(rows)
     })

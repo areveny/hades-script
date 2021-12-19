@@ -22,7 +22,6 @@ class Display extends React.Component<DisplayProps, DisplayState> {
   }
 
   addsStuffQuery = () => {
-    this.setState({ 'results': new Array<Result>()}, () => {
       axios.post('http://localhost:4000/',
         {'selectedSpeakers': Array.from(this.props.selectedSpeakers), 
           'matchString': this.props.matchString},
@@ -30,7 +29,6 @@ class Display extends React.Component<DisplayProps, DisplayState> {
         .then((response) => {
           this.setState({ 'results': response.data })
         })
-    })
   }
 
   componentDidUpdate(prevProps: DisplayProps) {

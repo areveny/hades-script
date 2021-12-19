@@ -1,0 +1,20 @@
+.display {
+    width: 80%;
+    display: inline-block;
+    justify-content: center;
+}
+
+.display p {
+    text-align: justify;
+}
+
+.speakerName {
+    float: left;
+    font-size: small;
+}
+
+.conversationName {
+    float: right;
+    font-size: small;
+}
+

@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import Result from '../models/models';
 import { useParams } from 'react-router';
-import { convertFormatting } from '../query/display/display';
+import LinesDisplay from '../linesDisplay/linesDisplay';
 
 interface ConversationState {
     conversationName: string;
@@ -56,18 +56,7 @@ class Conversation extends React.PureComponent<ConversationProps, ConversationSt
             return this.notFound()
         } else {
             return (
-                <div className='conversation'>
-                    {this.state.results.map((result: Result) => {
-                        return (
-                            <div key={result.line_name}>
-                                <span className='speakerName' key={result.line_name + '-' + result.speaker}>{result.speaker}</span>
-                                <span className='conversationName' key={result.line_name + '-' + result.conversation_name}>{result.conversation_name}</span>
-                                <br />
-                                <div className='text' key={result.line_name + '-container'}>{convertFormatting(result.text, result.line_name)}</div>
-                            </div>
-                        )
-                    })}
-                </div>
+                <LinesDisplay lines={this.state.results} />
             )
         }
     }

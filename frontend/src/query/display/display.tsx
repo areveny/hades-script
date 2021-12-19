@@ -13,30 +13,57 @@ interface DisplayState {
   results: Result[];
 }
 
+const useCache = false;
+const cacheSize = 10;
+
 // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization
 class Display extends React.Component<DisplayProps, DisplayState> {
 
+  cache: {[key: string]: Result[]} = {}
+  cacheEntries = new Array<string>()
+
   constructor(props: DisplayProps) {
     super(props)
-    this.state = { 'results': new Array<Result>()}
+    this.state = { 'results': new Array<Result>() }
   }
 
-  addsStuffQuery = () => {
-      axios.post('http://localhost:4000/',
-        {'selectedSpeakers': Array.from(this.props.selectedSpeakers), 
-          'matchString': this.props.matchString},
-        { headers: { 'Content-Type': 'application/json' } })
-        .then((response) => {
-          this.setState({ 'results': response.data })
-        })
+  loadCache = (matchString: string, results: Result[]) => {
+    this.cache[matchString] = results
+    this.cacheEntries.unshift(matchString)
+    if (this.cacheEntries.length > cacheSize) {
+      var evacuated = this.cacheEntries.pop()
+      if (evacuated) {
+        delete this.cache[evacuated]
+      }
+    }
+  }
+
+  runQuery = () => {
+    axios.post('http://localhost:4000/',
+      {
+        'selectedSpeakers': Array.from(this.props.selectedSpeakers),
+        'matchString': this.props.matchString
+      },
+      { headers: { 'Content-Type': 'application/json' } })
+      .then((response) => {
+        this.setState({ 'results': response.data })
+        this.loadCache(this.props.matchString, response.data)
+      })
   }
 
   componentDidUpdate(prevProps: DisplayProps) {
-    if ((this.props.selectedSpeakers !== prevProps.selectedSpeakers &&
-        this.props.selectedSpeakers.size > 0) ||
-        (this.props.matchString !== prevProps.matchString && this.props.matchString !== '')
-     ) {
-      this.addsStuffQuery()
+    if (this.props.selectedSpeakers !== prevProps.selectedSpeakers && this.props.selectedSpeakers.size > 0) { // Different speakers
+      this.cache = {}
+      this.cacheEntries = []
+      this.runQuery()
+    } else { // Same speakers
+      if (this.props.matchString !== prevProps.matchString && this.props.matchString !== '') { // New searchString, do update
+        if (this.props.matchString in this.cache) { // Check cache
+          this.setState({ 'results': this.cache[this.props.matchString] })
+        } else {
+          this.runQuery()
+        }
+      }
     }
   }
 
@@ -47,4 +74,4 @@ class Display extends React.Component<DisplayProps, DisplayState> {
   }
 }
 
-export default Display; 
+export default Display;

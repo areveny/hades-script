@@ -21,7 +21,7 @@ function getQuery(queryProps) {
     if (filters.length > 0) {
         filterText = ` WHERE ${filters.join(' AND ')}`
     }
-    var query = `SELECT * FROM lines ${filterText} LIMIT 100;`
+    var query = `SELECT * FROM lines ${filterText} ORDER BY rowid LIMIT 100;`
     console.log(query)
     return query
 }

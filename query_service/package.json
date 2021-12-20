@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "@angular/cli": "^13.0.3",
-    "better-sqlite3": "^7.4.5",
     "cors": "^2.8.5",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "sqlite3": "^4.2.0"
   },
   "name": "hades-script",
   "description": "",

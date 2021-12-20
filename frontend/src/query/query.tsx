@@ -91,7 +91,7 @@ class Query extends React.Component<any, QueryState> {
         </div>
         <div className="matchString">
           <label>
-            Match text:
+            Match text: 
             <input type='text' value={this.state.matchString} onChange={this.handleChange} />
           </label>
         </div>

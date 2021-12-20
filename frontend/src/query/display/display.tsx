@@ -57,7 +57,7 @@ class Display extends React.Component<DisplayProps, DisplayState> {
       this.cacheEntries = []
       this.runQuery()
     } else { // Same speakers
-      if (this.props.matchString !== prevProps.matchString && this.props.matchString !== '') { // New searchString, do update
+      if (this.props.matchString !== prevProps.matchString) { // New searchString, do update
         if (this.props.matchString in this.cache) { // Check cache
           this.setState({ 'results': this.cache[this.props.matchString] })
         } else {

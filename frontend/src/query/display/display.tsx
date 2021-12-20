@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import LinesDisplay from '../../linesDisplay/linesDisplay';
 import Result from '../../models/models';
+import { serverUrl } from '../../static';
 import './display.css';
 
 interface DisplayProps {
@@ -19,7 +20,7 @@ const cacheSize = 10;
 // https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#what-about-memoization
 class Display extends React.Component<DisplayProps, DisplayState> {
 
-  cache: {[key: string]: Result[]} = {}
+  cache: { [key: string]: Result[] } = {}
   cacheEntries = new Array<string>()
 
   constructor(props: DisplayProps) {
@@ -39,7 +40,8 @@ class Display extends React.Component<DisplayProps, DisplayState> {
   }
 
   runQuery = () => {
-    axios.post('http://localhost:4000/',
+    console.log(serverUrl)
+    axios.post(serverUrl,
       {
         'selectedSpeakers': Array.from(this.props.selectedSpeakers),
         'matchString': this.props.matchString

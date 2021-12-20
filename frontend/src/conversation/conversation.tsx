@@ -3,6 +3,7 @@ import axios from 'axios';
 import Result from '../models/models';
 import { useParams } from 'react-router';
 import LinesDisplay from '../linesDisplay/linesDisplay';
+import { serverUrl } from '../static';
 
 interface ConversationState {
     conversationName: string;
@@ -13,18 +14,19 @@ interface ConversationProps {
     params: Params;
 }
 
-interface Params{
+interface Params {
     conversationName: string;
 }
 
 class Conversation extends React.PureComponent<ConversationProps, ConversationState> {
 
-
     constructor(props: ConversationProps) {
         super(props)
         var conversationName = this.props.params.conversationName
-        this.state = {'conversationName': conversationName,
-                        'results': new Array<Result>()}
+        this.state = {
+            'conversationName': conversationName,
+            'results': new Array<Result>()
+        }
     }
 
     componentDidMount() {
@@ -35,13 +37,14 @@ class Conversation extends React.PureComponent<ConversationProps, ConversationSt
     }
 
     queryConversation = (conversationName: string) => {
-            axios.post('http://localhost:4000/conversation',
-                { 'conversation_name': conversationName },
-                { headers: { 'Content-Type': 'application/json' } })
-                .then((response) => {
-                    console.log(response)
-                    this.setState({ 'results': response.data })
-                })
+        console.log(serverUrl)
+        axios.post(`${serverUrl}/conversation`,
+            { 'conversation_name': conversationName },
+            { headers: { 'Content-Type': 'application/json' } })
+            .then((response) => {
+                console.log(response)
+                this.setState({ 'results': response.data })
+            })
     }
 
     notFound = () => {
@@ -66,14 +69,14 @@ class Conversation extends React.PureComponent<ConversationProps, ConversationSt
 const withRouter = (WrappedComponent: any) => (props: any) => {
     const params = useParams();
     // etc... other react-router-dom v6 hooks
-  
+
     return (
-      <WrappedComponent
-        {...props}
-        params={params}
+        <WrappedComponent
+            {...props}
+            params={params}
         // etc...
-      />
+        />
     );
-  };
+};
 
 export default withRouter(Conversation);

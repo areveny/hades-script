@@ -24,7 +24,6 @@ function getQuery(queryProps) {
     return query
 }
 
-
 app.get("/", (req, res) => {
     res.json(db.prepare("SELECT * FROM lines LIMIT 100").all())
 })

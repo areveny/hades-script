@@ -1,12 +1,10 @@
 const express = require('express')
 const cors = require('cors')
-const sqlite3 = require('sqlite3')
+const db = require('better-sqlite3')('./hades-index.db')
 const { performance } = require('perf_hooks')
 
-var db = new sqlite3.Database('../hades-index.db')
-
 const app = express()
-app.use(cors({'origin': true}))
+app.use(cors({ 'origin': true }))
 app.use(express.json())
 const port = 4000
 
@@ -28,34 +26,24 @@ function getQuery(queryProps) {
 
 
 app.get("/", (req, res) => {
-
-    db.all("SELECT * FROM lines", function(err, rows) {
-        res.json(rows)
-    })
-
+    res.json(db.prepare("SELECT * FROM lines LIMIT 100").all())
 })
 
 app.post("/conversation", (req, res) => {
     console.log(req.body)
-    db.all(`SELECT * FROM lines WHERE conversation_name='${req.body.conversation_name}' ORDER BY rowid`, 
-    function (err, rows) {
-        res.json(rows)
-    })
+    res.json(db.prepare(`SELECT * FROM lines WHERE conversation_name='${req.body.conversation_name}' ORDER BY rowid`).all())
     var endTime = performance.now()
 }
 )
 
 app.post("/", (req, res) => {
     var startTime = performance.now()
-    db.all(getQuery(req.body), function (err, rows) {
-        res.json(rows)
-    })
+    res.json(getQuery(req.body).all())
     var endTime = performance.now()
     console.log(`${JSON.stringify(req.body)} took  ${endTime - startTime}`)
 }
 )
 
-
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
-  })
+    console.log(`Hades DB listening at http://localhost:${port}`)
+})

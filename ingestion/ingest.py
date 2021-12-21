@@ -114,6 +114,6 @@ def get_speaker_from_name(line_name):
         return line_name[4:line_name.find('_')]
 
 if __name__ == '__main__':
-    sqllite_ingestion = SqliteIngestionDB('query_service/hades-index.db')
+    sqllite_ingestion = SqliteIngestionDB('../query_service/hades-index.db')
     npc_ingest = Ingestion('raw-data/NPCData.lua', sqllite_ingestion)
     loot_ingest = Ingestion('raw-data/LootData.lua', sqllite_ingestion)

@@ -3,14 +3,13 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import Query from './query/query.tsx';
 import Header from './header/header.tsx';
+import About from './about/about';
 import Conversation from './conversation/conversation';
 import reportWebVitals from './reportWebVitals';
 import {
     BrowserRouter,
     Route,
     Routes,
-    Link,
-    useParams
   } from 'react-router-dom';
 
 ReactDOM.render(
@@ -31,9 +30,3 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
-
-function About() {
-    return (
-        <p>About page</p>
-    )
-}

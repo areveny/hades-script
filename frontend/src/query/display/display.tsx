@@ -40,7 +40,6 @@ class Display extends React.Component<DisplayProps, DisplayState> {
   }
 
   runQuery = () => {
-    console.log(serverUrl)
     axios.post(serverUrl,
       {
         'selectedSpeakers': Array.from(this.props.selectedSpeakers),

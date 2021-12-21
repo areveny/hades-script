@@ -37,7 +37,6 @@ class Conversation extends React.PureComponent<ConversationProps, ConversationSt
     }
 
     queryConversation = (conversationName: string) => {
-        console.log(serverUrl)
         axios.post(`${serverUrl}/conversation`,
             { 'conversation_name': conversationName },
             { headers: { 'Content-Type': 'application/json' } })

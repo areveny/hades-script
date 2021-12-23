@@ -22,5 +22,5 @@
   },
   "include": [
     "src"
-  ]
+, "../web_service/webserve.js"  ]
 }

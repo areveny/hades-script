@@ -41,5 +41,5 @@ class SqliteIngestionDB(IngestionDB):
         con.close()
 
 if __name__ == '__main__':
-    con = sqlite3.connect('query_service/hades-index.db')
+    con = sqlite3.connect('../query-service/hades-index.db')
     

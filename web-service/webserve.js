@@ -1,8 +1,9 @@
 const express = require('express')
+const compression = require('compression')
 
 const app = express()
-app.use(express.static('../frontend/build'))
-app.use(express.json())
+app.use(compression())
+app.use(express.static('../frontend/build', {maxage: '1h'}))
 const port = 3000
 
 app.get('/*', function(req, res) {

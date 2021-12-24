@@ -10,7 +10,7 @@ npm install pm2 -g
 cd query-service
 npm install https://github.com/mapbox/node-sqlite3/tarball/master
 npm install
-pm2 start query.js
+pm2 start query-service.js --name query
 
 # ~/web-service
 cd web-service

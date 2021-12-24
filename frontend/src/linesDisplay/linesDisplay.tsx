@@ -14,20 +14,24 @@ class LinesDisplay extends React.Component<LinesDisplayProps, any> {
   }
 
   render() {
-    return (
-      <div className='display'>
-        {this.props.lines.map((result: Result) => {
-          return (
-            <div key={result.line_name}>
-              <span className='speakerName' key={result.line_name + '-' + result.speaker}>{result.speaker}</span>
-              <a className='conversationName' href={'/conversation/' + result.conversation_name} key={result.line_name + '-' + result.conversation_name}>{result.conversation_name}</a>
-              <br />
-              <div className='text' key={result.line_name + '-container'}>{convertFormatting(result.text, result.line_name)}</div>
-            </div>
-          )
-        })}
-      </div>
-    );
+    if (!this.props.lines) {
+      return (<p>No results found.</p>)
+    } else {
+      return (
+        <div className='display'>
+          {this.props.lines.map((result: Result) => {
+            return (
+              <div key={result.line_name}>
+                <span className='speakerName' key={result.line_name + '-' + result.speaker}>{result.speaker}</span>
+                <a className='conversationName' href={'/conversation/' + result.conversation_name} key={result.line_name + '-' + result.conversation_name}>{result.conversation_name}</a>
+                <br />
+                <div className='text' key={result.line_name + '-container'}>{convertFormatting(result.text, result.line_name)}</div>
+              </div>
+            )
+          })}
+        </div>
+      );
+    }
   }
 }
 

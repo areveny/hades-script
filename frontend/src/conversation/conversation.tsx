@@ -4,10 +4,12 @@ import Result from '../models/models';
 import { useParams } from 'react-router';
 import LinesDisplay from '../linesDisplay/linesDisplay';
 import { serverUrl } from '../static';
+import { SSL_OP_EPHEMERAL_RSA } from 'constants';
 
 interface ConversationState {
     conversationName: string;
     results: Result[];
+    searched: boolean;
 }
 
 interface ConversationProps {
@@ -25,7 +27,8 @@ class Conversation extends React.PureComponent<ConversationProps, ConversationSt
         var conversationName = this.props.params.conversationName
         this.state = {
             'conversationName': conversationName,
-            'results': new Array<Result>()
+            'results': new Array<Result>(),
+            'searched': false
         }
     }
 
@@ -41,21 +44,15 @@ class Conversation extends React.PureComponent<ConversationProps, ConversationSt
             { 'conversation_name': conversationName },
             { headers: { 'Content-Type': 'application/json' } })
             .then((response) => {
-                console.log(response)
-                this.setState({ 'results': response.data })
+                this.setState({ 'results': response.data, 'searched': true })
             })
     }
 
-    notFound = () => {
-        return (
-            <p>Not found</p>
-        )
-    }
-
     render() {
-        console.log(this.state)
-        if (!this.state || this.state.conversationName === '' || this.state.results.length === 0) {
-            return this.notFound()
+        if (this.state.conversationName === '') {
+            return 
+        } else if (this.state.searched && this.state.results.length == 0) {
+            return (<p>Conversation {this.state.conversationName} not found.</p>)
         } else {
             return (
                 <LinesDisplay lines={this.state.results} />

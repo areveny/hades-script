@@ -3,6 +3,7 @@
     "@angular/cli": "^13.0.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "moment": "^2.29.1",
     "sqlite3": "^4.2.0"
   },
   "name": "hades-script",
